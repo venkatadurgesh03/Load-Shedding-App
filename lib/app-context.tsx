@@ -20,7 +20,7 @@ interface AppState {
 }
 
 interface AppContextType extends AppState {
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   setSelectedRegion: (regionId: string | null) => void;
   addSchedule: (schedule: Omit<OutageSchedule, "id">) => void;
@@ -71,7 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadInitialData();
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+  const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -80,7 +80,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (error || !data.user) {
         console.error("Login failed:", error?.message);
-        return false;
+        return { success: false };
+      }
+
+      const APPROVED_ADMINS = [
+        "venkatadurgesh03@gmail.com",
+        "admin@loadshedding.com"
+      ];
+
+      if (!data.user.email || !APPROVED_ADMINS.includes(data.user.email.toLowerCase())) {
+        await supabase.auth.signOut();
+        return { success: false, error: "Access denied. Admin account required." };
       }
 
       setState((prev) => ({
@@ -95,10 +105,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isAdmin: true,
       }));
 
-      return true;
+      return { success: true };
     } catch (err) {
       console.error("Unexpected login error:", err);
-      return false;
+      return { success: false };
     }
   }, []);
 

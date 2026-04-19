@@ -80,12 +80,12 @@ export function LoginForm({ isAdmin = false, onSuccess }: LoginFormProps) {
     setIsLoading(true);
     setError("");
 
-    const success = await login(email, password);
+    const result = await login(email, password);
 
-    if (success) {
+    if (result.success) {
       onSuccess?.();
     } else {
-      setError("Invalid credentials. Please try again.");
+      setError(result.error || "Invalid credentials. Please try again.");
     }
 
     setIsLoading(false);
