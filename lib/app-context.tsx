@@ -85,7 +85,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       const APPROVED_ADMINS = [
         "venkatadurgesh03@gmail.com",
-        "admin@loadshedding.com"
+        "admin@powersync.in"
       ];
 
       if (!data.user.email || !APPROVED_ADMINS.includes(data.user.email.toLowerCase())) {
